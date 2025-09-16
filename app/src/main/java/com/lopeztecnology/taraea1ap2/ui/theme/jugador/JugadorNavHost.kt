@@ -51,7 +51,7 @@ fun JugadorNavHost(
             )
         }
 
-        // ✅ Nueva pantalla de historial
+
         composable(
             route = "historial/{nombreJugador}",
             arguments = listOf(navArgument("nombreJugador") { type = NavType.StringType })

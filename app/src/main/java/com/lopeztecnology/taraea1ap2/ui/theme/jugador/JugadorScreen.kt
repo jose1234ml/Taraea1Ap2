@@ -13,15 +13,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lopeztecnology.taraea1ap2.data.local.Jugador
 
 @Composable
 fun JugadorScreen(
     viewModel: JugadorViewModel,
     navToCrear: () -> Unit,
     navToStartGame: () -> Unit,
-    navToHistorial: (String) -> Unit  // ✅ Nueva lambda
+    navToHistorial: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     JugadorScreenContent(
@@ -39,7 +41,7 @@ fun JugadorScreenContent(
     onEvent: (JugadorEvent) -> Unit,
     navToCrear: () -> Unit,
     navToStartGame: () -> Unit,
-    navToHistorial: (String) -> Unit  // ✅ Nueva lambda
+    navToHistorial: (String) -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -70,7 +72,7 @@ fun JugadorScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .clickable { navToHistorial(jugador.nombres) }, // ✅ Click para ver historial
+                            .clickable { navToHistorial(jugador.nombres) },
                         colors = CardDefaults.cardColors(containerColor = Color(0xFF1565C0)),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -134,4 +136,27 @@ fun JugadorScreenContent(
             }
         }
     }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun JugadorScreenPreview() {
+    val fakeState = JugadorState(
+        jugadores = listOf(
+            Jugador(jugadorId = 1, nombres = "Juan Pérez", partidas = 5),
+            Jugador(jugadorId = 2, nombres = "Ana López", partidas = 3),
+            Jugador(jugadorId = 3, nombres = "Carlos Gómez", partidas = 7)
+        ),
+        error = null,
+        successMessage = "Jugador cargados con éxito"
+    )
+
+    JugadorScreenContent(
+        state = fakeState,
+        onEvent = {},
+        navToCrear = {},
+        navToStartGame = {},
+        navToHistorial = {}
+    )
 }

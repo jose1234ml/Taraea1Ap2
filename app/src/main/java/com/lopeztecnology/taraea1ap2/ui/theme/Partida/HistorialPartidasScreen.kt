@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lopeztecnology.taraea1ap2.data.local.PartidaEntity
+
 import java.text.SimpleDateFormat
 import java.util.*
 
