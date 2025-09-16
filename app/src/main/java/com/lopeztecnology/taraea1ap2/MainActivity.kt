@@ -4,23 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import com.lopeztecnology.taraea1ap2.ui.theme.jugador.JugadorNavHost
-import com.lopeztecnology.taraea1ap2.ui.theme.jugador.JugadorViewModel
-import com.lopeztecnology.taraea1ap2.ui.theme.jugador.JugadorViewModelFactory
 import androidx.compose.material3.MaterialTheme
+import com.lopeztecnology.taraea1ap2.ui.theme.jugador.*
 
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: JugadorViewModel by viewModels {
+    private val jugadorViewModel: JugadorViewModel by viewModels {
         JugadorViewModelFactory(applicationContext)
+    }
+
+    // Creamos el ViewModel de Partida usando la Factory que inyecta el repository
+    private val partidaViewModel: PartidaViewModel by viewModels {
+        PartidaViewModelFactory(applicationContext)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                // Usamos NavHost para manejar la navegación entre crear y listado
-                JugadorNavHost(viewModel = viewModel)
+                // NavHost con los dos ViewModels
+                JugadorNavHost(
+                    viewModel = jugadorViewModel,
+                    partidaViewModel = partidaViewModel
+                )
             }
         }
     }

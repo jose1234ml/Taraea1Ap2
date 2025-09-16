@@ -5,7 +5,7 @@ import com.lopeztecnology.taraea1ap2.domain.repository.JugadorRepository
 
 class InsertJugadorUseCase(private val repository: JugadorRepository) {
     suspend operator fun invoke(jugador: Jugador): Boolean {
-        // validación  campos obligatorios
+
         if (jugador.nombres.isBlank() || jugador.partidas < 0) return false
         return repository.insertJugador(jugador)
     }

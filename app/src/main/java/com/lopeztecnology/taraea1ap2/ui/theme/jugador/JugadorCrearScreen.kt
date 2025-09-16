@@ -8,13 +8,32 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+
 
 @Composable
-fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
+fun JugadorCrearScreen(
+    viewModel: JugadorViewModel,
+    navBack: () -> Unit
+) {
     val state by viewModel.state.collectAsState()
+    JugadorCrearContent(
+        state = state,
+        onEvent = { viewModel.onEvent(it) },
+        navBack = navBack
+    )
+}
+
+
+@Composable
+fun JugadorCrearContent(
+    state: JugadorState,
+    onEvent: (JugadorEvent) -> Unit,
+    navBack: () -> Unit
+) {
     val focusManager = LocalFocusManager.current
 
     Box(
@@ -29,7 +48,7 @@ fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
         ) {
             OutlinedTextField(
                 value = state.nombre,
-                onValueChange = { viewModel.onEvent(JugadorEvent.NombreChanged(it)) },
+                onValueChange = { onEvent(JugadorEvent.NombreChanged(it)) },
                 label = { Text("Nombre completo", color = Color.White) },
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
                 modifier = Modifier.fillMaxWidth()
@@ -37,7 +56,7 @@ fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
 
             OutlinedTextField(
                 value = state.partidas,
-                onValueChange = { viewModel.onEvent(JugadorEvent.PartidasChanged(it)) },
+                onValueChange = { onEvent(JugadorEvent.PartidasChanged(it)) },
                 label = { Text("Partidas (número)", color = Color.White) },
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -50,7 +69,7 @@ fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
                 Button(
                     onClick = {
                         focusManager.clearFocus()
-                        viewModel.onEvent(JugadorEvent.GuardarJugador)
+                        onEvent(JugadorEvent.GuardarJugador)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107))
                 ) {
@@ -58,7 +77,7 @@ fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
                 }
 
                 OutlinedButton(
-                    onClick = { viewModel.onEvent(JugadorEvent.ClearMessages) },
+                    onClick = { onEvent(JugadorEvent.ClearMessages) },
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFFFFC107))
                 ) {
                     Text("Limpiar mensajes")
@@ -77,4 +96,22 @@ fun JugadorCrearScreen(viewModel: JugadorViewModel, navBack: () -> Unit) {
             state.successMessage?.let { Text(it, color = Color.Green, fontWeight = FontWeight.Bold) }
         }
     }
+}
+
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun JugadorCrearScreenPreview() {
+    val fakeState = JugadorState(
+        nombre = "Juan Pérez",
+        partidas = "5",
+        error = null,
+        successMessage = "Jugador guardado con éxito"
+    )
+
+    JugadorCrearContent(
+        state = fakeState,
+        onEvent = {},
+        navBack = {}
+    )
 }
