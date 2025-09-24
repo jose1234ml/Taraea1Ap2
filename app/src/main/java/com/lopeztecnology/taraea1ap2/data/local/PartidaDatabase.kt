@@ -5,10 +5,15 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PartidaEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [PartidaEntity::class, LogroEntity::class, Jugador::class],
+    version = 1,
+    exportSchema = false
+)
 abstract class PartidaDatabase : RoomDatabase() {
-
     abstract fun partidaDao(): PartidaDao
+    abstract fun logroDao(): LogroDao
+    abstract fun jugadorDao(): JugadorDao
 
     companion object {
         @Volatile
@@ -20,7 +25,9 @@ abstract class PartidaDatabase : RoomDatabase() {
                     context.applicationContext,
                     PartidaDatabase::class.java,
                     "partidas_db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
