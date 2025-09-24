@@ -8,9 +8,9 @@ data class PartidaEntity(
     @PrimaryKey(autoGenerate = true) val partidaId: Int = 0,
     val jugadorX: String,
     val jugadorO: String,
-    val turno: String = "X",
-    val tablero: String = "",
-    val ganador: String? = null,
-    val fecha: Long = System.currentTimeMillis(),
-    val esFinalizada: Boolean = false
+    val turno: String,
+    val tablero: String,
+    val ganador: String?,
+    val fecha: Long,
+    val esFinalizada: Boolean
 )
