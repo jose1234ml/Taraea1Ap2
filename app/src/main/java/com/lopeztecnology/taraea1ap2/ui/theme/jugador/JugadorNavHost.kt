@@ -23,7 +23,8 @@ fun JugadorNavHost(
                 MainScreen(
                     navToCrearJugador = { navController.navigate("crearJugador") },
                     navToCrearPartida = { navController.navigate("startGame") },
-                    navToHistorial = { navController.navigate("historial") }
+                    navToHistorial = { navController.navigate("historial") },
+                    navToLogros = { navController.navigate("logros") } // <-- agregado
                 )
             }
 
@@ -60,8 +61,30 @@ fun JugadorNavHost(
                         partidaViewModel.cargarPartidaSeleccionada(partidaEntity)
                         navController.navigate("partida")
                     },
-                    navToCrearPartida = { navController.navigate("startGame") } // ← aquí pasa la navegación al "+"
+                    navToCrearPartida = { navController.navigate("startGame") }
                 )
+            }
+
+            // Nueva pantalla de logros
+            composable("logros") {
+                LogrosScreen(
+                    viewModel = viewModel,
+                    onJugadorClick = { jugadorLogros ->
+                        partidaViewModel.seleccionarJugadorLogros(jugadorLogros)
+                        navController.navigate("detalleLogros")
+                    },
+                    navBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("detalleLogros") {
+                val jugadorLogros = partidaViewModel.jugadorSeleccionado.value
+                if (jugadorLogros != null) {
+                    JugadorDetalleLogrosScreen(
+                        jugadorLogros = jugadorLogros,
+                        navBack = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -71,7 +94,8 @@ fun JugadorNavHost(
 fun MainScreen(
     navToCrearJugador: () -> Unit,
     navToCrearPartida: () -> Unit,
-    navToHistorial: () -> Unit
+    navToHistorial: () -> Unit,
+    navToLogros: () -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -101,6 +125,10 @@ fun MainScreen(
 
             Button(onClick = navToHistorial, modifier = Modifier.fillMaxWidth()) {
                 Text("Historial de Partidas")
+            }
+
+            Button(onClick = navToLogros, modifier = Modifier.fillMaxWidth()) {
+                Text("Logros")
             }
         }
     }

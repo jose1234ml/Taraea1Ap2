@@ -12,10 +12,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.lopeztecnology.taraea1ap2.data.local.Jugador
+
 
 @Composable
 fun JugadorScreen(
@@ -136,29 +135,5 @@ fun JugadorScreenContent(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun JugadorScreenPreview() {
-    val fakeState = JugadorState(
-        jugadores = listOf(
-            Jugador(jugadorId = 1, nombres = "Juan Pérez", partidas = 5),
-            Jugador(jugadorId = 2, nombres = "Ana López", partidas = 3),
-            Jugador(jugadorId = 3, nombres = "Carlos Gómez", partidas = 7)
-        ),
-        error = null,
-        successMessage = "Jugador cargados con éxito"
-    )
-
-    MaterialTheme {
-        JugadorScreenContent(
-            state = fakeState,
-            onEvent = {},
-            navToCrear = {},
-            navToStartGame = {},
-            navToHistorial = {}
-        )
     }
 }

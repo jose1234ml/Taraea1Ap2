@@ -3,8 +3,9 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("kotlin-kapt")
-    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.0" // Serialization
+    kotlin("plugin.serialization") version "1.9.0" // 🔹 Cambiado aquí
 }
+
 
 android {
     namespace = "com.lopeztecnology.taraea1ap2"
@@ -74,6 +75,9 @@ dependencies {
 
     // Kotlinx Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
+
+    implementation("androidx.compose.material3:material3:1.3.1")
+    implementation("androidx.compose.material:material-icons-extended:1.5.0") // <- necesaria
 
     // Testing
     testImplementation(libs.junit)
