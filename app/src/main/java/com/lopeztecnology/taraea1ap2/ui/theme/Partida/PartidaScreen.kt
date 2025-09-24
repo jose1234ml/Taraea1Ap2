@@ -8,11 +8,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
-
 
 @Composable
 fun PartidaScreen(
@@ -20,11 +18,12 @@ fun PartidaScreen(
     navBack: () -> Unit
 ) {
     val partida = viewModel.partida ?: return
+    val colorScheme = MaterialTheme.colorScheme
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1))
+            .background(colorScheme.background)
             .padding(16.dp)
     ) {
         Column(
@@ -37,9 +36,8 @@ fun PartidaScreen(
                 text = "Turno: ${partida.turno}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = colorScheme.onBackground
             )
-
 
             Column {
                 partida.tablero.forEachIndexed { filaIndex, fila ->
@@ -48,7 +46,10 @@ fun PartidaScreen(
                             Box(
                                 modifier = Modifier
                                     .size(80.dp)
-                                    .background(Color.White, shape = RoundedCornerShape(8.dp))
+                                    .background(
+                                        color = colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
                                     .clickable { viewModel.jugar(filaIndex, colIndex) },
                                 contentAlignment = Alignment.Center
                             ) {
@@ -56,7 +57,11 @@ fun PartidaScreen(
                                     text = celda,
                                     fontSize = 36.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (celda == "X") Color.Red else Color.Blue
+                                    color = when (celda) {
+                                        "X" -> colorScheme.error
+                                        "O" -> colorScheme.primary
+                                        else -> colorScheme.onSurfaceVariant // texto gris oscuro
+                                    }
                                 )
                             }
                             Spacer(modifier = Modifier.width(8.dp))
@@ -66,13 +71,12 @@ fun PartidaScreen(
                 }
             }
 
-
             partida.ganador?.let {
                 Text(
                     text = if (it == "Empate") "Empate!" else "Ganador: $it",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.Yellow
+                    color = colorScheme.tertiary
                 )
             }
 
@@ -80,17 +84,17 @@ fun PartidaScreen(
 
             UiComponents.AnimatedButton(
                 text = "Reiniciar Partida",
-                normalColor = Color(0xFFFFC107),
-                pressedColor = Color(0xFFFFD740),
-                textColor = Color.Black,
+                normalColor = colorScheme.secondary,
+                pressedColor = colorScheme.secondaryContainer,
+                textColor = colorScheme.onSecondary,
                 onClick = { viewModel.reiniciar() }
             )
 
             UiComponents.AnimatedButton(
                 text = "Volver",
-                normalColor = Color(0xFFE53935),
-                pressedColor = Color(0xFFEF5350),
-                textColor = Color.White,
+                normalColor = colorScheme.error,
+                pressedColor = colorScheme.errorContainer,
+                textColor = colorScheme.onError,
                 onClick = navBack
             )
         }

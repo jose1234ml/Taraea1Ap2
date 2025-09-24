@@ -10,7 +10,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -43,10 +42,12 @@ fun JugadorScreenContent(
     navToStartGame: () -> Unit,
     navToHistorial: (String) -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1))
+            .background(colorScheme.background)
             .padding(16.dp)
     ) {
         Column(
@@ -58,7 +59,7 @@ fun JugadorScreenContent(
                 text = "Jugadores Registrados",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
@@ -73,12 +74,12 @@ fun JugadorScreenContent(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable { navToHistorial(jugador.nombres) },
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1565C0)),
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
                             text = "${jugador.nombres} • ${jugador.partidas} partidas",
-                            color = Color.White,
+                            color = colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium,
                             fontSize = 18.sp,
                             modifier = Modifier
@@ -98,18 +99,18 @@ fun JugadorScreenContent(
             ) {
                 UiComponents.AnimatedButton(
                     text = "Crear Nuevo Jugador",
-                    normalColor = Color(0xFFFFC107),
-                    pressedColor = Color(0xFFFFD740),
+                    normalColor = colorScheme.secondary,
+                    pressedColor = colorScheme.secondaryContainer,
                     onClick = navToCrear,
-                    textColor = Color.Black
+                    textColor = colorScheme.onSecondary
                 )
 
                 UiComponents.AnimatedButton(
                     text = "Crear Partida",
-                    normalColor = Color(0xFF4CAF50),
-                    pressedColor = Color(0xFF81C784),
+                    normalColor = colorScheme.primary,
+                    pressedColor = colorScheme.primaryContainer,
                     onClick = navToStartGame,
-                    textColor = Color.White
+                    textColor = colorScheme.onPrimary
                 )
             }
 
@@ -118,7 +119,7 @@ fun JugadorScreenContent(
             state.error?.let {
                 Text(
                     text = it,
-                    color = Color.Red,
+                    color = colorScheme.error,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -128,7 +129,7 @@ fun JugadorScreenContent(
             state.successMessage?.let {
                 Text(
                     text = it,
-                    color = Color.Green,
+                    color = colorScheme.tertiary,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -137,7 +138,6 @@ fun JugadorScreenContent(
         }
     }
 }
-
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -152,11 +152,13 @@ fun JugadorScreenPreview() {
         successMessage = "Jugador cargados con éxito"
     )
 
-    JugadorScreenContent(
-        state = fakeState,
-        onEvent = {},
-        navToCrear = {},
-        navToStartGame = {},
-        navToHistorial = {}
-    )
+    MaterialTheme {
+        JugadorScreenContent(
+            state = fakeState,
+            onEvent = {},
+            navToCrear = {},
+            navToStartGame = {},
+            navToHistorial = {}
+        )
+    }
 }

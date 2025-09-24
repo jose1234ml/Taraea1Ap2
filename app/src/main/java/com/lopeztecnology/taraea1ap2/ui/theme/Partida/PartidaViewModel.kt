@@ -10,6 +10,9 @@ import com.lopeztecnology.taraea1ap2.data.local.PartidaEntity
 import com.lopeztecnology.taraea1ap2.data.repository.PartidaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ArraySerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import java.util.Date
 
 data class Partida(
@@ -27,8 +30,56 @@ class PartidaViewModel(
     var partida by mutableStateOf<Partida?>(null)
         private set
 
+    private val jsonFormat = Json { encodeDefaults = true; ignoreUnknownKeys = true }
+
+    private var partidaActualEntityId: Int? = null
+
+
+
     fun iniciarPartida(jugadorX: Jugador, jugadorO: Jugador) {
-        partida = Partida(jugadorX = jugadorX.nombres, jugadorO = jugadorO.nombres)
+        val nuevaPartida = Partida(jugadorX = jugadorX.nombres, jugadorO = jugadorO.nombres)
+        partida = nuevaPartida
+        guardarPartida(nuevaPartida, esNueva = true)
+    }
+
+    fun cargarUltimaPartida(nombreJugador: String) {
+        viewModelScope.launch {
+            try {
+                val ultima = repository.obtenerUltimaPartida(nombreJugador)
+                ultima?.let {
+                    partidaActualEntityId = it.partidaId
+                    cargarPartidaSeleccionada(it)
+                }
+            } catch (e: Exception) {
+                partida = Partida(jugadorX = nombreJugador, jugadorO = "Oponente")
+            }
+        }
+    }
+
+    fun cargarPartidaSeleccionada(partidaEntity: PartidaEntity) {
+        try {
+            val tableroCargado = if (partidaEntity.tablero.isNotEmpty()) {
+                jsonFormat.decodeFromString(
+                    ArraySerializer(ArraySerializer(String.serializer())),
+                    partidaEntity.tablero
+                )
+            } else {
+                Array(3) { Array(3) { "" } }
+            }
+            partida = Partida(
+                jugadorX = partidaEntity.jugadorX,
+                jugadorO = partidaEntity.jugadorO,
+                turno = partidaEntity.turno.ifEmpty { "X" },
+                tablero = tableroCargado,
+                ganador = partidaEntity.ganador
+            )
+            partidaActualEntityId = partidaEntity.partidaId
+        } catch (e: Exception) {
+            partida = Partida(
+                jugadorX = partidaEntity.jugadorX,
+                jugadorO = partidaEntity.jugadorO
+            )
+        }
     }
 
     fun jugar(fila: Int, col: Int) {
@@ -38,23 +89,37 @@ class PartidaViewModel(
 
             if (verificarGanador(p.tablero, p.turno)) {
                 p.ganador = p.turno
-                guardarPartida(p)
             } else if (tableroLleno(p.tablero)) {
                 p.ganador = "Empate"
-                guardarPartida(p)
             } else {
                 p.turno = if (p.turno == "X") "O" else "X"
             }
 
-            // Forzar recomposición
-            val nuevoTablero = Array(3) { filaIndex -> p.tablero[filaIndex].copyOf() }
-            partida = p.copy(tablero = nuevoTablero)
+
+            partida = p.copy(tablero = Array(3) { p.tablero[it].copyOf() })
+
+
+            guardarPartida(p)
         }
     }
 
-    private fun tableroLleno(tablero: Array<Array<String>>): Boolean {
-        return tablero.all { fila -> fila.all { it.isNotEmpty() } }
+    fun reiniciar() {
+        partida?.let {
+            val nuevaPartida = Partida(it.jugadorX, it.jugadorO)
+            partida = nuevaPartida
+            guardarPartida(nuevaPartida, esNueva = true)
+        }
     }
+
+    fun obtenerPartidasPorJugador(nombreJugador: String): Flow<List<PartidaEntity>> {
+        return repository.obtenerPartidasPorJugador(nombreJugador)
+    }
+
+    fun obtenerTodasLasPartidas(): Flow<List<PartidaEntity>> {
+        return repository.obtenerTodasLasPartidas()
+    }
+
+    private fun tableroLleno(tablero: Array<Array<String>>) = tablero.all { fila -> fila.all { it.isNotEmpty() } }
 
     private fun verificarGanador(tablero: Array<Array<String>>, jugador: String): Boolean {
         if (tablero.any { fila -> fila.all { it == jugador } }) return true
@@ -64,32 +129,27 @@ class PartidaViewModel(
         return false
     }
 
-    private fun guardarPartida(p: Partida) {
+    private fun guardarPartida(p: Partida, esNueva: Boolean = false) {
         viewModelScope.launch {
-            repository.guardarPartida(
-                PartidaEntity(
-                    jugadorX = p.jugadorX,
-                    jugadorO = p.jugadorO,
-                    ganador = p.ganador ?: "Empate",
-                    fecha = Date().time, // ✅ Guardamos como Long
-                    esFinalizada = true
-                )
+            val partidaEntity = PartidaEntity(
+                partidaId = if (esNueva) 0 else partidaActualEntityId ?: 0,
+                jugadorX = p.jugadorX,
+                jugadorO = p.jugadorO,
+                turno = p.turno,
+                tablero = jsonFormat.encodeToString(ArraySerializer(ArraySerializer(String.serializer())), p.tablero),
+                ganador = p.ganador,
+                fecha = Date().time,
+                esFinalizada = p.ganador != null
             )
+
+            try {
+                if (esNueva) {
+                    val idGenerado = repository.guardarPartida(partidaEntity)
+                    partidaActualEntityId = idGenerado.toInt()
+                } else {
+                    repository.actualizarPartida(partidaEntity)
+                }
+            } catch (_: Exception) { }
         }
-    }
-
-    fun reiniciar() {
-        partida?.let {
-            partida = Partida(it.jugadorX, it.jugadorO)
-        }
-    }
-
-    // ✅ Nuevas funciones para el historial
-    fun obtenerPartidasPorJugador(nombreJugador: String): Flow<List<PartidaEntity>> {
-        return repository.obtenerPartidasPorJugador(nombreJugador)
-    }
-
-    fun obtenerTodasLasPartidas(): Flow<List<PartidaEntity>> {
-        return repository.obtenerTodasLasPartidas()
     }
 }

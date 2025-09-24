@@ -1,10 +1,13 @@
 package com.lopeztecnology.taraea1ap2.ui.theme.jugador
 
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavType
-
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.*
-import androidx.navigation.navArgument
 
 @Composable
 fun JugadorNavHost(
@@ -13,55 +16,92 @@ fun JugadorNavHost(
 ) {
     val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = "listado") {
+    MaterialTheme {
+        NavHost(navController = navController, startDestination = "main") {
 
-        composable("crear") {
-            JugadorCrearScreen(
-                viewModel = viewModel,
-                navBack = { navController.navigate("listado") { popUpTo("crear") { inclusive = true } } }
-            )
+            composable("main") {
+                MainScreen(
+                    navToCrearJugador = { navController.navigate("crearJugador") },
+                    navToCrearPartida = { navController.navigate("startGame") },
+                    navToHistorial = { navController.navigate("historial") }
+                )
+            }
+
+            composable("crearJugador") {
+                JugadorCrearScreen(
+                    viewModel = viewModel,
+                    navBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("startGame") {
+                StartGameScreen(
+                    jugadores = viewModel.state.value.jugadores,
+                    navBack = { navController.popBackStack() },
+                    onStartGame = { jugadorX, jugadorO ->
+                        partidaViewModel.iniciarPartida(jugadorX, jugadorO)
+                        navController.navigate("partida")
+                    }
+                )
+            }
+
+            composable("partida") {
+                PartidaScreen(
+                    viewModel = partidaViewModel,
+                    navBack = { navController.popBackStack() }
+                )
+            }
+
+            composable("historial") {
+                HistorialPartidasScreen(
+                    viewModel = partidaViewModel,
+                    navBack = { navController.popBackStack() },
+                    navToPartida = { partidaEntity ->
+                        partidaViewModel.cargarPartidaSeleccionada(partidaEntity)
+                        navController.navigate("partida")
+                    },
+                    navToCrearPartida = { navController.navigate("startGame") } // ← aquí pasa la navegación al "+"
+                )
+            }
         }
+    }
+}
 
-        composable("listado") {
-            JugadorScreen(
-                viewModel = viewModel,
-                navToCrear = { navController.navigate("crear") },
-                navToStartGame = { navController.navigate("startGame") },
-                navToHistorial = { nombreJugador ->
-                    navController.navigate("historial/$nombreJugador")
-                }
+@Composable
+fun MainScreen(
+    navToCrearJugador: () -> Unit,
+    navToCrearPartida: () -> Unit,
+    navToHistorial: () -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            Text(
+                text = "Pantalla Principal",
+                fontSize = 28.sp,
+                color = colorScheme.primary
             )
-        }
 
-        composable("startGame") {
-            StartGameScreen(
-                jugadores = viewModel.state.value.jugadores,
-                navBack = { navController.popBackStack() },
-                onStartGame = { jugadorX, jugadorO ->
-                    partidaViewModel.iniciarPartida(jugadorX, jugadorO)
-                    navController.navigate("partida")
-                }
-            )
-        }
+            Button(onClick = navToCrearJugador, modifier = Modifier.fillMaxWidth()) {
+                Text("Crear Jugador")
+            }
 
-        composable("partida") {
-            PartidaScreen(
-                viewModel = partidaViewModel,
-                navBack = { navController.popBackStack() }
-            )
-        }
+            Button(onClick = navToCrearPartida, modifier = Modifier.fillMaxWidth()) {
+                Text("Crear Partida")
+            }
 
-
-        composable(
-            route = "historial/{nombreJugador}",
-            arguments = listOf(navArgument("nombreJugador") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val nombreJugador = backStackEntry.arguments?.getString("nombreJugador") ?: ""
-            HistorialPartidasScreen(
-                nombreJugador = nombreJugador,
-                viewModel = partidaViewModel,
-                navBack = { navController.popBackStack() }
-            )
+            Button(onClick = navToHistorial, modifier = Modifier.fillMaxWidth()) {
+                Text("Historial de Partidas")
+            }
         }
     }
 }

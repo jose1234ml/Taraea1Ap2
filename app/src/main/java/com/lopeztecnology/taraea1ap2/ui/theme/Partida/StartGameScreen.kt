@@ -5,12 +5,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,10 +29,12 @@ fun StartGameScreen(
     var showSheetX by remember { mutableStateOf(false) }
     var showSheetO by remember { mutableStateOf(false) }
 
+    val colorScheme = MaterialTheme.colorScheme
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1))
+            .background(colorScheme.background)
             .padding(16.dp)
     ) {
         Column(
@@ -43,51 +43,47 @@ fun StartGameScreen(
             modifier = Modifier.fillMaxSize()
         ) {
 
-
             Text(
                 text = "Seleccionar Jugadores",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colorScheme.onBackground,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-
             UiComponents.AnimatedButton(
                 text = jugadorX?.nombres ?: "Seleccionar Jugador X",
-                normalColor = Color(0xFF4CAF50),
-                pressedColor = Color(0xFF81C784),
-                textColor = Color.White,
+                normalColor = colorScheme.primary,
+                pressedColor = colorScheme.primaryContainer,
+                textColor = colorScheme.onPrimary,
                 onClick = { showSheetX = true }
             )
 
-
             UiComponents.AnimatedButton(
                 text = jugadorO?.nombres ?: "Seleccionar Jugador O",
-                normalColor = Color(0xFF4CAF50),
-                pressedColor = Color(0xFF81C784),
-                textColor = Color.White,
+                normalColor = colorScheme.primary,
+                pressedColor = colorScheme.primaryContainer,
+                textColor = colorScheme.onPrimary,
                 onClick = { showSheetO = true }
             )
 
-
             UiComponents.AnimatedButton(
                 text = "Iniciar Partida",
-                normalColor = if (jugadorX != null && jugadorO != null) Color(0xFFFFC107) else Color.Gray,
-                pressedColor = if (jugadorX != null && jugadorO != null) Color(0xFFFFD740) else Color.Gray,
-                textColor = Color.Black,
+                normalColor = if (jugadorX != null && jugadorO != null) colorScheme.secondary else colorScheme.surfaceVariant,
+                pressedColor = if (jugadorX != null && jugadorO != null) colorScheme.secondaryContainer else colorScheme.surfaceVariant,
+                textColor = if (jugadorX != null && jugadorO != null) colorScheme.onSecondary else colorScheme.onSurfaceVariant,
                 onClick = { if (jugadorX != null && jugadorO != null) onStartGame(jugadorX!!, jugadorO!!) }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón Volver
+
             UiComponents.AnimatedButton(
                 text = "Volver",
-                normalColor = Color(0xFFE53935),
-                pressedColor = Color(0xFFEF5350),
-                textColor = Color.White,
+                normalColor = colorScheme.error,
+                pressedColor = colorScheme.errorContainer,
+                textColor = colorScheme.onError,
                 onClick = navBack
             )
         }
@@ -101,7 +97,7 @@ fun StartGameScreen(
                     Text(
                         text = jugador.nombres,
                         fontSize = 18.sp,
-                        color = Color.Black,
+                        color = colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -123,7 +119,7 @@ fun StartGameScreen(
                     Text(
                         text = jugador.nombres,
                         fontSize = 18.sp,
-                        color = Color.Black,
+                        color = colorScheme.onSurface,
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
@@ -153,4 +149,3 @@ fun StartGameScreenPreview() {
         onStartGame = { _, _ -> }
     )
 }
-

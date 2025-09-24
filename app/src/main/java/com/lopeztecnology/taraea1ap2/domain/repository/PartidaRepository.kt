@@ -6,8 +6,12 @@ import kotlinx.coroutines.flow.Flow
 
 class PartidaRepository(private val dao: PartidaDao) {
 
-    suspend fun guardarPartida(partida: PartidaEntity) {
-        dao.insert(partida)
+    suspend fun guardarPartida(partida: PartidaEntity): Long {
+        return dao.insert(partida)
+    }
+
+    suspend fun actualizarPartida(partida: PartidaEntity) {
+        dao.update(partida)
     }
 
     fun obtenerPartidasPorJugador(nombreJugador: String): Flow<List<PartidaEntity>> {
@@ -16,5 +20,9 @@ class PartidaRepository(private val dao: PartidaDao) {
 
     fun obtenerTodasLasPartidas(): Flow<List<PartidaEntity>> {
         return dao.getTodasLasPartidas()
+    }
+
+    suspend fun obtenerUltimaPartida(nombreJugador: String): PartidaEntity? {
+        return dao.getUltimaPartidaIncompleta(nombreJugador)
     }
 }
