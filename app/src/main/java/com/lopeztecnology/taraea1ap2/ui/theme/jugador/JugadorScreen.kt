@@ -1,6 +1,7 @@
 package com.lopeztecnology.taraea1ap2.ui.theme.jugador
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,20 +10,44 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.lopeztecnology.taraea1ap2.data.local.Jugador
 
 @Composable
-fun JugadorScreen(viewModel: JugadorViewModel, navToCrear: () -> Unit) {
+fun JugadorScreen(
+    viewModel: JugadorViewModel,
+    navToCrear: () -> Unit,
+    navToStartGame: () -> Unit,
+    navToHistorial: (String) -> Unit
+) {
     val state by viewModel.state.collectAsState()
+    JugadorScreenContent(
+        state = state,
+        onEvent = { viewModel.onEvent(it) },
+        navToCrear = navToCrear,
+        navToStartGame = navToStartGame,
+        navToHistorial = navToHistorial
+    )
+}
 
+@Composable
+fun JugadorScreenContent(
+    state: JugadorState,
+    onEvent: (JugadorEvent) -> Unit,
+    navToCrear: () -> Unit,
+    navToStartGame: () -> Unit,
+    navToHistorial: (String) -> Unit
+) {
+    val colorScheme = MaterialTheme.colorScheme
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFF0D47A1))
+            .background(colorScheme.background)
             .padding(16.dp)
     ) {
         Column(
@@ -34,10 +59,9 @@ fun JugadorScreen(viewModel: JugadorViewModel, navToCrear: () -> Unit) {
                 text = "Jugadores Registrados",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = colorScheme.onBackground,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-
 
             LazyColumn(
                 modifier = Modifier
@@ -48,19 +72,20 @@ fun JugadorScreen(viewModel: JugadorViewModel, navToCrear: () -> Unit) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF1565C0)),
-                        shape = RoundedCornerShape(8.dp)
+                            .padding(vertical = 4.dp)
+                            .clickable { navToHistorial(jugador.nombres) },
+                        colors = CardDefaults.cardColors(containerColor = colorScheme.primaryContainer),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Text(
                             text = "${jugador.nombres} • ${jugador.partidas} partidas",
-                            color = Color.White,
+                            color = colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Medium,
                             fontSize = 18.sp,
                             modifier = Modifier
                                 .padding(12.dp)
                                 .fillMaxWidth(),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -68,24 +93,72 @@ fun JugadorScreen(viewModel: JugadorViewModel, navToCrear: () -> Unit) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            Button(
-                onClick = navToCrear,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107)),
-                modifier = Modifier.fillMaxWidth(0.6f)
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
+                UiComponents.AnimatedButton(
                     text = "Crear Nuevo Jugador",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
+                    normalColor = colorScheme.secondary,
+                    pressedColor = colorScheme.secondaryContainer,
+                    onClick = navToCrear,
+                    textColor = colorScheme.onSecondary
+                )
+
+                UiComponents.AnimatedButton(
+                    text = "Crear Partida",
+                    normalColor = colorScheme.primary,
+                    pressedColor = colorScheme.primaryContainer,
+                    onClick = navToStartGame,
+                    textColor = colorScheme.onPrimary
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            state.error?.let {
+                Text(
+                    text = it,
+                    color = colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
-            state.error?.let { Text(it, color = Color.Red, fontWeight = FontWeight.Bold) }
-            state.successMessage?.let { Text(it, color = Color.Green, fontWeight = FontWeight.Bold) }
+            state.successMessage?.let {
+                Text(
+                    text = it,
+                    color = colorScheme.tertiary,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun JugadorScreenPreview() {
+    val fakeState = JugadorState(
+        jugadores = listOf(
+            Jugador(jugadorId = 1, nombres = "Juan Pérez", partidas = 5),
+            Jugador(jugadorId = 2, nombres = "Ana López", partidas = 3),
+            Jugador(jugadorId = 3, nombres = "Carlos Gómez", partidas = 7)
+        ),
+        error = null,
+        successMessage = "Jugador cargados con éxito"
+    )
+
+    MaterialTheme {
+        JugadorScreenContent(
+            state = fakeState,
+            onEvent = {},
+            navToCrear = {},
+            navToStartGame = {},
+            navToHistorial = {}
+        )
     }
 }

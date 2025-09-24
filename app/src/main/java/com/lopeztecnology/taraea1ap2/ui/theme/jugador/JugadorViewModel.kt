@@ -37,6 +37,7 @@ class JugadorViewModel(
         }
     }
 
+
     private fun guardar() {
         viewModelScope.launch {
             // validaciones
@@ -52,7 +53,7 @@ class JugadorViewModel(
             if (!exito) {
                 _state.value = _state.value.copy(error = "Ya existe un jugador con ese nombre")
             } else {
-                // recarga lista y limpia campos
+
                 val lista = getJugadores()
                 _state.value = _state.value.copy(
                     jugadores = lista,

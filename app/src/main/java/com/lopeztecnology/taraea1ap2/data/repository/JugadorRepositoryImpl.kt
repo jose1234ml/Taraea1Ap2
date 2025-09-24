@@ -9,7 +9,7 @@ class JugadorRepositoryImpl(
     private val dao: JugadorDao
 ) : JugadorRepository {
     override suspend fun insertJugador(jugador: Jugador): Boolean {
-        // validar duplicado
+
         val existente = dao.findByName(jugador.nombres.trim())
         if (existente != null) return false
         dao.insert(jugador)
