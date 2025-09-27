@@ -5,12 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+
 @Database(
     entities = [PartidaEntity::class, LogroEntity::class, Jugador::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class PartidaDatabase : RoomDatabase() {
+
     abstract fun partidaDao(): PartidaDao
     abstract fun logroDao(): LogroDao
     abstract fun jugadorDao(): JugadorDao
@@ -26,6 +28,7 @@ abstract class PartidaDatabase : RoomDatabase() {
                     PartidaDatabase::class.java,
                     "partidas_db"
                 )
+
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
