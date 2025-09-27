@@ -5,27 +5,30 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
+
 @Database(
-    entities = [Jugador::class, LogroEntity::class, PartidaEntity::class],
+    entities = [PartidaEntity::class, LogroEntity::class, Jugador::class],
     version = 2,
     exportSchema = false
 )
-abstract class JugadorDatabase : RoomDatabase() {
-    abstract fun jugadorDao(): JugadorDao
-    abstract fun logroDao(): LogroDao
+abstract class PartidaDatabase : RoomDatabase() {
+
     abstract fun partidaDao(): PartidaDao
+    abstract fun logroDao(): LogroDao
+    abstract fun jugadorDao(): JugadorDao
 
     companion object {
         @Volatile
-        private var INSTANCE: JugadorDatabase? = null
+        private var INSTANCE: PartidaDatabase? = null
 
-        fun getInstance(context: Context): JugadorDatabase {
+        fun getInstance(context: Context): PartidaDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    JugadorDatabase::class.java,
-                    "jugadores_db"
+                    PartidaDatabase::class.java,
+                    "partidas_db"
                 )
+
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

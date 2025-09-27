@@ -1,0 +1,19 @@
+package com.lopeztecnology.taraea1ap2.ui.theme.jugador
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.lopeztecnology.taraea1ap2.data.local.PartidaDatabase
+import com.lopeztecnology.taraea1ap2.data.repository.PartidaRepository
+import com.lopeztecnology.taraea1ap2.data.repository.LogroRepository
+
+class PartidaViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        val db = PartidaDatabase.getInstance(context)
+        val partidaRepo = PartidaRepository(db.partidaDao())
+        val logroRepo = LogroRepository(db.logroDao())
+
+        @Suppress("UNCHECKED_CAST")
+        return PartidaViewModel(partidaRepo, logroRepo) as T
+    }
+}
