@@ -7,12 +7,13 @@ import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lopeztecnology.taraea1ap2.data.local.Jugador
-import com.lopeztecnology.taraea1ap2.data.local.Logro
 import com.lopeztecnology.taraea1ap2.data.local.LogroEntity
 import com.lopeztecnology.taraea1ap2.data.local.PartidaEntity
 import com.lopeztecnology.taraea1ap2.data.repository.PartidaRepository
 import com.lopeztecnology.taraea1ap2.data.repository.LogroRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ArraySerializer
 import kotlinx.serialization.builtins.serializer
@@ -47,29 +48,28 @@ class PartidaViewModel(
     private val _jugadorSeleccionado = mutableStateOf<JugadorLogros?>(null)
     val jugadorSeleccionado: State<JugadorLogros?> = _jugadorSeleccionado
 
+
+    private val _notificacionLogro = MutableStateFlow<String?>(null)
+    val notificacionLogro: StateFlow<String?> = _notificacionLogro
+
+
+    private var jugadorXId: Int? = null
+    private var jugadorOId: Int? = null
+
     fun seleccionarJugadorLogros(jugadorLogros: JugadorLogros) {
         _jugadorSeleccionado.value = jugadorLogros
     }
 
     fun iniciarPartida(jugadorX: Jugador, jugadorO: Jugador) {
+        jugadorXId = jugadorX.jugadorId
+        jugadorOId = jugadorO.jugadorId
+
         val nuevaPartida = Partida(jugadorX = jugadorX.nombres, jugadorO = jugadorO.nombres)
         partida = nuevaPartida
         guardarPartida(nuevaPartida, esNueva = true)
     }
 
-    fun cargarUltimaPartida(nombreJugador: String) {
-        viewModelScope.launch {
-            try {
-                val ultima = repository.obtenerUltimaPartida(nombreJugador)
-                ultima?.let {
-                    partidaActualEntityId = it.partidaId
-                    cargarPartidaSeleccionada(it)
-                }
-            } catch (e: Exception) {
-                partida = Partida(jugadorX = nombreJugador, jugadorO = "Oponente")
-            }
-        }
-    }
+
 
     fun cargarPartidaSeleccionada(partidaEntity: PartidaEntity) {
         try {
@@ -97,19 +97,22 @@ class PartidaViewModel(
         }
     }
 
-    fun jugar(fila: Int, col: Int, jugadorXId: Int, jugadorOId: Int) {
+    fun jugar(fila: Int, col: Int) {
         val p = partida ?: return
+        val xId = jugadorXId ?: return
+        val oId = jugadorOId ?: return
+
         if (p.tablero[fila][col].isEmpty() && p.ganador == null) {
             p.tablero[fila][col] = p.turno
 
             when {
                 verificarGanador(p.tablero, p.turno) -> {
                     p.ganador = p.turno
-                    generarLogros(p, jugadorXId, jugadorOId)
+                    generarLogros(p, xId, oId)
                 }
                 tableroLleno(p.tablero) -> {
                     p.ganador = "Empate"
-                    generarLogros(p, jugadorXId, jugadorOId)
+                    generarLogros(p, xId, oId)
                 }
                 else -> p.turno = if (p.turno == "X") "O" else "X"
             }
@@ -123,19 +126,48 @@ class PartidaViewModel(
         viewModelScope.launch {
             val logros = mutableListOf<LogroEntity>()
 
+
+            val jugadorXLogros = logroRepository.obtenerLogrosPorJugadorSuspend(jugadorXId)
+            val jugadorOLogros = logroRepository.obtenerLogrosPorJugadorSuspend(jugadorOId)
+
+
             when (partida.ganador) {
-                "X" -> logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "Ganó una partida"))
-                "O" -> logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "Ganó una partida"))
-                "Empate" -> {
-                    logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "Partida empatada"))
-                    logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "Partida empatada"))
+                "X" -> {
+                    logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "¡Ganó la partida!"))
+                    _notificacionLogro.value = "Jugador ${partida.jugadorX}: ¡Ganó la partida!"
+                    if (jugadorXLogros.none { it.descripcion.contains("¡Ganó la partida!") }) {
+                        logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "Primera victoria"))
+                        _notificacionLogro.value = "Jugador ${partida.jugadorX}: Primera victoria"
+                    }
                 }
+                "O" -> {
+                    logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "¡Ganó la partida!"))
+                    _notificacionLogro.value = "Jugador ${partida.jugadorO}: ¡Ganó la partida!"
+                    if (jugadorOLogros.none { it.descripcion.contains("¡Ganó la partida!") }) {
+                        logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "Primera victoria"))
+                        _notificacionLogro.value = "Jugador ${partida.jugadorO}: Primera victoria"
+                    }
+                }
+                "Empate" -> {
+                    logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "Empate épico"))
+                    logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "Empate épico"))
+                    _notificacionLogro.value = "Empate épico entre ${partida.jugadorX} y ${partida.jugadorO}"
+                }
+            }
+
+
+            if (partida.turno == "X" && jugadorXLogros.size >= 5) {
+                logros.add(LogroEntity(jugadorId = jugadorXId, descripcion = "5 partidas jugadas"))
+                _notificacionLogro.value = "Jugador ${partida.jugadorX}: 5 partidas jugadas"
+            }
+            if (partida.turno == "O" && jugadorOLogros.size >= 5) {
+                logros.add(LogroEntity(jugadorId = jugadorOId, descripcion = "5 partidas jugadas"))
+                _notificacionLogro.value = "Jugador ${partida.jugadorO}: 5 partidas jugadas"
             }
 
             logros.forEach { logroRepository.insertarLogro(it) }
         }
     }
-
 
     fun reiniciar() {
         partida?.let {
@@ -145,12 +177,13 @@ class PartidaViewModel(
         }
     }
 
-    fun obtenerPartidasPorJugador(nombreJugador: String): Flow<List<PartidaEntity>> {
-        return repository.obtenerPartidasPorJugador(nombreJugador)
-    }
 
     fun obtenerTodasLasPartidas(): Flow<List<PartidaEntity>> {
         return repository.obtenerTodasLasPartidas()
+    }
+
+    fun clearNotificacion() {
+        _notificacionLogro.value = null
     }
 
     private fun tableroLleno(tablero: Array<Array<String>>) = tablero.all { fila -> fila.all { it.isNotEmpty() } }

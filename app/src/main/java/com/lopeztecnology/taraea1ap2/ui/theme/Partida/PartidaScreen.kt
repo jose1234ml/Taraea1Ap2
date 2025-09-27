@@ -1,16 +1,21 @@
 package com.lopeztecnology.taraea1ap2.ui.theme.jugador
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.font.FontWeight
+import kotlinx.coroutines.delay
+
 
 @Composable
 fun PartidaScreen(
@@ -19,6 +24,10 @@ fun PartidaScreen(
 ) {
     val partida = viewModel.partida ?: return
     val colorScheme = MaterialTheme.colorScheme
+    val scope = rememberCoroutineScope()
+
+
+    val notificacion by viewModel.notificacionLogro.collectAsState()
 
     Box(
         modifier = Modifier
@@ -60,7 +69,7 @@ fun PartidaScreen(
                                     color = when (celda) {
                                         "X" -> colorScheme.error
                                         "O" -> colorScheme.primary
-                                        else -> colorScheme.onSurfaceVariant // texto gris oscuro
+                                        else -> colorScheme.onSurfaceVariant
                                     }
                                 )
                             }
@@ -98,5 +107,60 @@ fun PartidaScreen(
                 onClick = navBack
             )
         }
+
+
+        notificacion?.let { mensaje ->
+            LogroPopup(mensaje) {
+                viewModel.clearNotificacion()
+            }
+        }
     }
 }
+
+@Composable
+fun LogroPopup(
+    mensaje: String,
+    onDismiss: () -> Unit
+) {
+    var visible by remember { mutableStateOf(true) }
+
+
+    val offsetY by animateDpAsState(
+        targetValue = if (visible) 0.dp else (-100).dp,
+        animationSpec = tween(durationMillis = 500, easing = FastOutSlowInEasing)
+    )
+
+    LaunchedEffect(Unit) {
+
+        delay(3000)
+        visible = false
+        delay(500)
+        onDismiss()
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .offset(y = offsetY),
+        contentAlignment = Alignment.TopCenter
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .padding(vertical = 16.dp, horizontal = 24.dp)
+        ) {
+            Text(
+                text = "🏆 LOGRO: $mensaje",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
+    }
+}
+
+

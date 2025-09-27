@@ -56,19 +56,10 @@ class JugadorViewModel(
         }
     }
 
-    fun insertarLogro(jugador: Jugador, descripcion: String) {
-        viewModelScope.launch {
-            logroRepository.insertarLogro(
-                LogroEntity(jugadorId = jugador.jugadorId, descripcion = descripcion)
-            )
-            cargarTodosLosLogros(_state.value.jugadores)
-        }
-    }
-
 
     private fun guardar() {
         viewModelScope.launch {
-            // validaciones
+
             val nombre = _state.value.nombre.trim()
             val partidas = _state.value.partidas.toIntOrNull() ?: -1
 
