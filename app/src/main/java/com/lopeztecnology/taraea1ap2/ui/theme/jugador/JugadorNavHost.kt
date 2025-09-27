@@ -24,7 +24,7 @@ fun JugadorNavHost(
                     navToCrearJugador = { navController.navigate("crearJugador") },
                     navToCrearPartida = { navController.navigate("startGame") },
                     navToHistorial = { navController.navigate("historial") },
-                    navToLogros = { navController.navigate("logros") } // <-- agregado
+                    navToLogros = { navController.navigate("logros") }
                 )
             }
 

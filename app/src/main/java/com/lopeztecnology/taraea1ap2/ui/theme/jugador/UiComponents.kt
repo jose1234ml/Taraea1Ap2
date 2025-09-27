@@ -47,9 +47,6 @@ class UiComponents {
             }
         }
 
-        @Composable
-        fun Spacing(height: Int) {
-            Spacer(modifier = Modifier.height(height.dp))
-        }
+
     }
 }

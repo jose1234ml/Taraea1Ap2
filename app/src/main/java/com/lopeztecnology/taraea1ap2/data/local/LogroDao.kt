@@ -16,4 +16,8 @@ interface LogroDao {
 
     @Query("SELECT * FROM logros ORDER BY fecha DESC")
     fun obtenerTodosLosLogros(): Flow<List<LogroEntity>>
+
+    @Query("SELECT * FROM logros WHERE jugadorId = :jugadorId")
+    suspend fun obtenerLogrosPorJugadorList(jugadorId: Int): List<LogroEntity>
+
 }

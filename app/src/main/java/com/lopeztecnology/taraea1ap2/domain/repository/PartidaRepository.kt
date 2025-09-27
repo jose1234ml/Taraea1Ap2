@@ -22,7 +22,5 @@ class PartidaRepository(private val dao: PartidaDao) {
         return dao.obtenerTodasLasPartidas()
     }
 
-    suspend fun obtenerUltimaPartida(nombreJugador: String): PartidaEntity? {
-        return dao.obtenerUltimaPartida(nombreJugador)
-    }
+
 }

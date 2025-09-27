@@ -12,6 +12,10 @@ class LogroRepository(private val dao: LogroDao) {
     fun obtenerLogrosPorJugador(jugadorId: Int): Flow<List<LogroEntity>> =
         dao.obtenerLogrosPorJugador(jugadorId)
 
-    fun obtenerTodosLosLogros(): Flow<List<LogroEntity>> =
-        dao.obtenerTodosLosLogros()
+    suspend fun obtenerLogrosPorJugadorSuspend(jugadorId: Int): List<LogroEntity> {
+        return dao.obtenerLogrosPorJugadorList(jugadorId)
+    }
+
 }
+
+

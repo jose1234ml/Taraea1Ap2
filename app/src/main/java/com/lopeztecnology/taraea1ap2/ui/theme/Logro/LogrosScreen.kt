@@ -5,8 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEvents
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,12 +21,14 @@ fun LogrosScreen(
     navBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    val jugadoresLogrosMap by viewModel.jugadoresLogros.collectAsState()
 
     val jugadoresLogros = state.jugadores.map { jugador ->
+        val logros = jugadoresLogrosMap[jugador.jugadorId]?.map { it.descripcion } ?: emptyList()
         JugadorLogros(
             jugador = jugador,
-            cantidadLogros = jugador.partidas,
-            logros = List(jugador.partidas) { index -> "Logro #${index + 1}" }
+            cantidadLogros = logros.size,
+            logros = logros
         )
     }
 
@@ -57,31 +58,33 @@ fun LogrosScreen(
                             .clickable { onJugadorClick(jugadorLogros) },
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(
-                                    imageVector = Icons.Filled.EmojiEvents,
-                                    contentDescription = "Trofeo",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 Text(
                                     text = jugadorLogros.jugador.nombres,
                                     fontSize = 18.sp,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
+                                Text(
+                                    text = "${jugadorLogros.cantidadLogros}",
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
                             }
-                            Text(
-                                text = "${jugadorLogros.cantidadLogros}",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.secondary
-                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            jugadorLogros.logros.forEach { logro ->
+                                Text(
+                                    text = "• $logro",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
                         }
                     }
                 }
