@@ -12,7 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.lopeztecnology.taraea1ap2.tarea.navigation.AppNavHost
+import com.lopeztecnology.taraea1ap2.tarea.navegacion.AppNavHost
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
